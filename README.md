@@ -1,6 +1,7 @@
 # Government-Scheme-Eligibility-Application-Tracking-System
 
 **Project Description**
+
 The Government Schemes Application Management System is a role-based web application designed to digitize and manage the complete lifecycle of government scheme applications. The system provides a structured platform where applicants can submit applications, officers can verify them, and administrators can manage schemes and users.
 The objective of this project is to ensure transparency, proper workflow management, and secure handling of applications instead of acting as a simple form-filling portal.
 
