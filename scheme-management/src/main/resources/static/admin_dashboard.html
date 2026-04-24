@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — GovScheme Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --primary: #1a6cf6; --primary-dark: #1251c4; --accent: #00d4aa; --bg: #f0f4ff; --card: #ffffff; --text: #0f1b2d; --muted: #6b7a99; --border: #e2e8f8; --sidebar: #0f1b2d; --sidebar-text: #a8b8d8; --success: #00c97a; --warning: #f59e0b; --error: #f04444; --purple: #7c3aed; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; background: var(--sidebar); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; }
+    .sidebar-logo { display: flex; align-items: center; gap: 12px; padding: 28px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), #4a90f7); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .logo-text { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: white; }
+    .logo-sub { font-size: 10px; color: var(--sidebar-text); margin-top: 1px; }
+    .sidebar-section { padding: 20px 16px 8px; font-size: 10px; font-weight: 600; letter-spacing: 1px; color: rgba(168,184,216,0.5); text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 16px; margin: 2px 8px; border-radius: 10px; cursor: pointer; transition: all 0.2s; color: var(--sidebar-text); font-size: 14px; font-weight: 500; text-decoration: none; }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: white; }
+    .nav-item.active { background: rgba(26,108,246,0.2); color: white; border-left: 3px solid var(--primary); }
+    .nav-icon { font-size: 18px; width: 22px; text-align: center; }
+    .nav-badge { margin-left: auto; background: var(--primary); color: white; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+    .nav-badge.warning { background: var(--warning); }
+    .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .user-card { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.05); }
+    .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .user-name { font-size: 13px; font-weight: 600; color: white; }
+    .user-role { font-size: 11px; color: var(--sidebar-text); }
+    .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.5; }
+    .logout-btn:hover { opacity: 1; }
+    .main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: white; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; }
+    .topbar-left p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-btn { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border); background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; }
+    .content { padding: 32px; flex: 1; }
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; margin-bottom: 28px; }
+    .stat-card { background: var(--card); border-radius: 16px; padding: 24px; border: 1px solid var(--border); position: relative; overflow: hidden; transition: transform 0.2s; }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .stat-card.blue::before   { background: linear-gradient(90deg,#1a6cf6,#4a90f7); }
+    .stat-card.green::before  { background: linear-gradient(90deg,#00c97a,#00d4aa); }
+    .stat-card.orange::before { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+    .stat-card.purple::before { background: linear-gradient(90deg,#7c3aed,#a78bfa); }
+    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 16px; }
+    .stat-card.blue .stat-icon   { background: #eef4ff; } .stat-card.green .stat-icon  { background: #ecfdf5; }
+    .stat-card.orange .stat-icon { background: #fffbeb; } .stat-card.purple .stat-icon { background: #f5f3ff; }
+    .stat-value { font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+    .stat-label { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+    .stat-change { font-size: 12px; font-weight: 500; }
+    .stat-change.up { color: var(--success); } .stat-change.down { color: var(--error); }
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+    .chart-card { background: var(--card); border-radius: 16px; padding: 24px; border: 1px solid var(--border); }
+    .chart-title { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .chart-subtitle { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+    canvas { max-height: 220px; }
+    .table-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 28px; }
+    .table-header { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .table-title { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; }
+    .table-actions { display: flex; gap: 10px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #f8faff; padding: 12px 20px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    td { padding: 14px 20px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8faff; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge.pending { background: #fffbeb; color: #d97706; } .badge.approved { background: #ecfdf5; color: #059669; } .badge.rejected { background: #fef2f2; color: #dc2626; }
+    .badge.active   { background: #ecfdf5; color: #059669; } .badge.inactive { background: #f1f5f9; color: #64748b; }
+    .btn-sm { padding: 7px 16px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border); background: white; color: var(--text); }
+    .btn-sm.primary { background: var(--primary); color: white; border-color: var(--primary); }
+    .btn-sm.primary:hover { background: var(--primary-dark); }
+    .applicant-info { display: flex; align-items: center; gap: 10px; }
+    .applicant-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; font-weight: 600; flex-shrink: 0; }
+    .applicant-name { font-weight: 500; font-size: 13px; }
+    .applicant-email { font-size: 11px; color: var(--muted); }
+    .action-btns { display: flex; gap: 6px; }
+    .icon-btn { width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border); background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+    .icon-btn:hover { background: var(--bg); }
+    .icon-btn.danger:hover { background: #fef2f2; border-color: #fca5a5; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .page-title { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; }
+    .filter-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-select { padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; background: white; outline: none; cursor: pointer; }
+    .filter-input { padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; background: white; outline: none; flex: 1; min-width: 200px; }
+    .assign-grid { display: grid; gap: 12px; }
+    .assign-row { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 14px; }
+    .assign-info { flex: 1; }
+    .assign-name { font-weight: 600; font-size: 14px; }
+    .assign-scheme { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .assign-select { padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; background: #f8faff; outline: none; cursor: pointer; min-width: 160px; }
+    .assign-btn { padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .assign-btn:hover { background: var(--primary-dark); }
+    .assign-btn.assigned { background: var(--success); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,27,45,0.5); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: white; border-radius: 20px; padding: 36px; width: 100%; max-width: 480px; box-shadow: 0 24px 64px rgba(15,27,45,0.2); transform: translateY(20px); transition: transform 0.3s; }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .modal-title { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; }
+    .modal-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: white; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .modal .form-group { margin-bottom: 16px; }
+    .modal label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .modal input, .modal select, .modal textarea { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; background: #f8faff; outline: none; transition: all 0.2s; }
+    .modal input:focus, .modal select:focus { border-color: var(--primary); background: white; }
+    .modal textarea { min-height: 80px; resize: vertical; }
+    .modal-footer { display: flex; gap: 10px; margin-top: 24px; }
+    .modal-footer .btn-sm { flex: 1; padding: 12px; text-align: center; }
+    .loading { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏛️</div>
+      <div><div class="logo-text">GovScheme</div><div class="logo-sub">Admin Portal</div></div>
+    </div>
+    <div class="sidebar-section">Main</div>
+    <a class="nav-item active" onclick="showSection('dashboard',this)"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item" onclick="showSection('applications',this)"><span class="nav-icon">📋</span> Applications<span class="nav-badge warning" id="pending-badge">0</span></a>
+    <div class="sidebar-section">Management</div>
+    <a class="nav-item" onclick="showSection('schemes',this)"><span class="nav-icon">🗂️</span> Manage Schemes</a>
+    <a class="nav-item" onclick="showSection('users',this)"><span class="nav-icon">👥</span> Manage Users</a>
+    <a class="nav-item" onclick="showSection('assign',this)"><span class="nav-icon">👮</span> Assign Officers<span class="nav-badge" id="unassigned-badge">0</span></a>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar">👤</div>
+        <div><div class="user-name" id="sidebar-name">Loading...</div><div class="user-role">Super Admin</div></div>
+        <button class="logout-btn" onclick="logout()">🚪</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 id="page-title">Dashboard Overview</h1>
+        <p id="page-subtitle"></p>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-btn">🔔</div>
+        <div class="topbar-btn">❓</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="section active" id="section-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card blue"><div class="stat-icon">👥</div><div class="stat-value" id="s-users">0</div><div class="stat-label">Total Users</div><div class="stat-change up">↑ Registered users</div></div>
+          <div class="stat-card green"><div class="stat-icon">📋</div><div class="stat-value" id="s-apps">0</div><div class="stat-label">Total Applications</div><div class="stat-change up">↑ All time</div></div>
+          <div class="stat-card orange"><div class="stat-icon">🗂️</div><div class="stat-value" id="s-schemes">0</div><div class="stat-label">Active Schemes</div><div class="stat-change up">↑ Currently open</div></div>
+          <div class="stat-card purple"><div class="stat-icon">⏳</div><div class="stat-value" id="s-pending">0</div><div class="stat-label">Pending Reviews</div><div class="stat-change down">↑ Need attention</div></div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card"><div class="chart-title">Application Status</div><div class="chart-subtitle">Current distribution</div><canvas id="doughnutChart"></canvas></div>
+          <div class="chart-card"><div class="chart-title">Applications Overview</div><div class="chart-subtitle">Approved vs Pending vs Rejected</div><canvas id="barChart"></canvas></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><div class="table-title">Recent Applications</div></div>
+          <div id="recent-apps-body"><div class="loading">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- APPLICATIONS -->
+      <div class="section" id="section-applications">
+        <div class="page-header"><div class="page-title">All Applications</div></div>
+        <div class="filter-row">
+          <input class="filter-input" type="text" id="app-search" placeholder="🔍 Search by name or scheme..." oninput="filterApplications()"/>
+          <select class="filter-select" id="app-status-filter" onchange="filterApplications()"><option value="">All Status</option><option value="PENDING">Pending</option><option value="APPROVED">Approved</option><option value="REJECTED">Rejected</option></select>
+        </div>
+        <div class="table-card"><div id="all-apps-body"><div class="loading">Loading...</div></div></div>
+      </div>
+
+      <!-- SCHEMES -->
+      <div class="section" id="section-schemes">
+        <div class="page-header">
+          <div class="page-title">Manage Schemes</div>
+          <button class="btn-sm primary" onclick="openModal('scheme-modal')">+ Add New Scheme</button>
+        </div>
+        <div class="table-card"><div id="schemes-body"><div class="loading">Loading...</div></div></div>
+      </div>
+
+      <!-- USERS -->
+      <div class="section" id="section-users">
+        <div class="page-header">
+          <div class="page-title">Manage Users</div>
+          <button class="btn-sm primary" onclick="openModal('user-modal')">+ Add New User</button>
+        </div>
+        <div class="filter-row">
+          <input class="filter-input" type="text" id="user-search" placeholder="🔍 Search users..." oninput="filterUsers()"/>
+          <select class="filter-select" id="user-role-filter" onchange="filterUsers()"><option value="">All Roles</option><option value="APPLICANT">Applicant</option><option value="OFFICER">Officer</option><option value="ADMIN">Admin</option></select>
+        </div>
+        <div class="table-card"><div id="users-body"><div class="loading">Loading...</div></div></div>
+      </div>
+
+      <!-- ASSIGN OFFICERS -->
+      <div class="section" id="section-assign">
+        <div class="page-header">
+          <div class="page-title">Assign Officers to Applications</div>
+          <span style="font-size:13px;color:var(--muted)" id="unassigned-count"></span>
+        </div>
+        <div class="assign-grid" id="assign-grid"><div class="loading">Loading...</div></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- SCHEME MODAL -->
+  <div class="modal-overlay" id="scheme-modal" onclick="closeModalOutside(event,'scheme-modal')">
+    <div class="modal">
+      <div class="modal-header"><div class="modal-title">Add New Scheme</div><button class="modal-close" onclick="closeModal('scheme-modal')">✕</button></div>
+      <div class="form-group"><label>Scheme Name</label><input type="text" id="s-name" placeholder="e.g. PM Awas Yojana"/></div>
+      <div class="form-group"><label>Description</label><textarea id="s-desc" placeholder="What is this scheme about?"></textarea></div>
+      <div class="form-group"><label>Eligibility Criteria</label><textarea id="s-eligibility" placeholder="Who can apply?"></textarea></div>
+      <div class="form-group"><label>Required Documents</label><input type="text" id="s-docs" placeholder="e.g. Aadhaar, Income Certificate"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><label>Start Date</label><input type="date" id="s-start"/></div>
+        <div class="form-group"><label>End Date</label><input type="date" id="s-end"/></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm" onclick="closeModal('scheme-modal')">Cancel</button>
+        <button class="btn-sm primary" onclick="saveScheme()">Save Scheme</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER MODAL -->
+  <div class="modal-overlay" id="user-modal" onclick="closeModalOutside(event,'user-modal')">
+    <div class="modal">
+      <div class="modal-header"><div class="modal-title">Add New User</div><button class="modal-close" onclick="closeModal('user-modal')">✕</button></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><label>Full Name</label><input type="text" id="u-name" placeholder="Full name"/></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="u-phone" placeholder="Phone number"/></div>
+      </div>
+      <div class="form-group"><label>Email</label><input type="email" id="u-email" placeholder="Email address"/></div>
+      <div class="form-group"><label>Role</label><select id="u-role"><option value="APPLICANT">Applicant</option><option value="OFFICER">Officer</option><option value="ADMIN">Admin</option></select></div>
+      <div class="form-group"><label>Password</label><input type="password" id="u-password" placeholder="Set password"/></div>
+      <div class="modal-footer">
+        <button class="btn-sm" onclick="closeModal('user-modal')">Cancel</button>
+        <button class="btn-sm primary" onclick="saveUser()">Add User</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script>
+    requireAuth('ADMIN');
+
+    let allApplications = [];
+    let allUsers        = [];
+    let allOfficers     = [];
+    let allSchemes      = [];
+
+    const pageTitles = {
+      dashboard:    ['Dashboard Overview',                 new Date().toDateString()],
+      applications: ['All Applications',                   'Manage and track all submitted applications'],
+      schemes:      ['Manage Schemes',                     'Create and manage government schemes'],
+      users:        ['Manage Users',                       'View and manage all registered users'],
+      assign:       ['Assign Officers',                    'Assign officers to pending applications'],
+    };
+
+    function showSection(id, navEl) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById('section-' + id).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      if (navEl) navEl.classList.add('active');
+      document.getElementById('page-title').textContent    = pageTitles[id][0];
+      document.getElementById('page-subtitle').textContent = pageTitles[id][1];
+      if (id === 'applications') renderAllApps();
+      if (id === 'schemes')      loadSchemes();
+      if (id === 'users')        loadUsers();
+      if (id === 'assign')       loadAssign();
+    }
+
+    function badgeHtml(status) {
+      const map = { PENDING:'pending ⏳ Pending', APPROVED:'approved ✓ Approved', REJECTED:'rejected ✗ Rejected' };
+      const parts = (map[status] || 'pending ⏳ Pending').split(' ');
+      return `<span class="badge ${parts[0]}">${parts.slice(1).join(' ')}</span>`;
+    }
+
+    // ── Load dashboard ────────────────────────────────────────────────────────
+    async function loadDashboard() {
+      document.getElementById('sidebar-name').textContent = getFullName();
+      document.getElementById('page-subtitle').textContent = new Date().toDateString();
+      try {
+        const [stats, apps, officers] = await Promise.all([
+          api.get('/api/admin/dashboard'),
+          api.get('/api/admin/applications'),
+          api.get('/api/admin/officers'),
+        ]);
+        allApplications = apps;
+        allOfficers     = officers;
+
+        document.getElementById('s-users').textContent   = stats.totalUsers;
+        document.getElementById('s-apps').textContent    = stats.totalApplications;
+        document.getElementById('s-schemes').textContent = stats.activeSchemes;
+        document.getElementById('s-pending').textContent = stats.pendingApplications;
+        document.getElementById('pending-badge').textContent   = stats.pendingApplications;
+
+        const unassigned = apps.filter(a => a.officerName === 'Not Assigned').length;
+        document.getElementById('unassigned-badge').textContent = unassigned;
+
+        renderRecentApps();
+        initCharts(stats);
+      } catch(err) { console.error(err); }
+    }
+
+    function renderRecentApps() {
+      const recent = allApplications.slice(0, 5);
+      if (!recent.length) {
+        document.getElementById('recent-apps-body').innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No applications yet.</p></div>';
+        return;
+      }
+      document.getElementById('recent-apps-body').innerHTML = `
+        <table>
+          <thead><tr><th>Applicant</th><th>Scheme</th><th>Applied On</th><th>Officer</th><th>Status</th></tr></thead>
+          <tbody>
+            ${recent.map(a => `<tr>
+              <td><div class="applicant-info"><div class="applicant-avatar">${a.applicantName[0]}</div><div><div class="applicant-name">${a.applicantName}</div><div class="applicant-email">${a.applicantEmail}</div></div></div></td>
+              <td>${a.schemeName}</td>
+              <td>${new Date(a.appliedAt).toLocaleDateString('en-IN')}</td>
+              <td>${a.officerName}</td>
+              <td>${badgeHtml(a.status)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    function renderAllApps() {
+      filterApplications();
+    }
+
+    function filterApplications() {
+      const search = (document.getElementById('app-search')?.value || '').toLowerCase();
+      const status = document.getElementById('app-status-filter')?.value || '';
+      const filtered = allApplications.filter(a =>
+        (!search || a.applicantName.toLowerCase().includes(search) || a.schemeName.toLowerCase().includes(search)) &&
+        (!status || a.status === status)
+      );
+      document.getElementById('all-apps-body').innerHTML = filtered.length ? `
+        <table>
+          <thead><tr><th>ID</th><th>Applicant</th><th>Scheme</th><th>Applied On</th><th>Officer</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${filtered.map(a => `<tr>
+              <td>#${a.applicationId}</td>
+              <td><div class="applicant-info"><div class="applicant-avatar">${a.applicantName[0]}</div><div><div class="applicant-name">${a.applicantName}</div><div class="applicant-email">${a.applicantEmail}</div></div></div></td>
+              <td>${a.schemeName}</td>
+              <td>${new Date(a.appliedAt).toLocaleDateString('en-IN')}</td>
+              <td>${a.officerName}</td>
+              <td>${badgeHtml(a.status)}</td>
+              <td><div class="action-btns"><div class="icon-btn" title="View">👁️</div></div></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>` : '<div class="empty-state"><div class="icon">📭</div><p>No applications found.</p></div>';
+    }
+
+    // ── Schemes ───────────────────────────────────────────────────────────────
+    async function loadSchemes() {
+      try {
+        allSchemes = await api.get('/api/admin/schemes');
+        document.getElementById('schemes-body').innerHTML = `
+          <table>
+            <thead><tr><th>Scheme Name</th><th>Start Date</th><th>End Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${allSchemes.map(s => `<tr>
+                <td><strong>${s.schemeName}</strong><br/><span style="font-size:11px;color:var(--muted)">${s.description?.substring(0,60)}...</span></td>
+                <td>${new Date(s.startDate).toLocaleDateString('en-IN')}</td>
+                <td>${new Date(s.endDate).toLocaleDateString('en-IN')}</td>
+                <td><span class="badge ${s.isActive ? 'active' : 'inactive'}">● ${s.isActive ? 'Active' : 'Inactive'}</span></td>
+                <td><div class="action-btns">
+                  ${s.isActive ? `<div class="icon-btn danger" title="Deactivate" onclick="deactivateScheme(${s.schemeId})">🚫</div>` : ''}
+                  <div class="icon-btn danger" title="Delete" onclick="deleteScheme(${s.schemeId})">🗑️</div>
+                </div></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`;
+      } catch(err) { console.error(err); }
+    }
+
+    async function saveScheme() {
+      const body = {
+        schemeName: document.getElementById('s-name').value,
+        description: document.getElementById('s-desc').value,
+        eligibilityCriteria: document.getElementById('s-eligibility').value,
+        requiredDocuments: document.getElementById('s-docs').value,
+        startDate: document.getElementById('s-start').value,
+        endDate: document.getElementById('s-end').value,
+        isActive: true
+      };
+      try {
+        await api.post('/api/admin/schemes', body);
+        closeModal('scheme-modal');
+        loadSchemes();
+      } catch(err) { alert('Error: ' + err.message); }
+    }
+
+    async function deactivateScheme(id) {
+      if (!confirm('Deactivate this scheme?')) return;
+      await api.put(`/api/admin/schemes/${id}/deactivate`);
+      loadSchemes();
+    }
+
+    async function deleteScheme(id) {
+      if (!confirm('Permanently delete this scheme?')) return;
+      await api.delete(`/api/admin/schemes/${id}`);
+      loadSchemes();
+    }
+
+    // ── Users ─────────────────────────────────────────────────────────────────
+    async function loadUsers() {
+      try {
+        allUsers = await api.get('/api/admin/users');
+        filterUsers();
+      } catch(err) { console.error(err); }
+    }
+
+    function filterUsers() {
+      const search = (document.getElementById('user-search')?.value || '').toLowerCase();
+      const role   = document.getElementById('user-role-filter')?.value || '';
+      const filtered = allUsers.filter(u =>
+        (!search || u.fullName.toLowerCase().includes(search) || u.email.toLowerCase().includes(search)) &&
+        (!role   || u.role === role)
+      );
+      document.getElementById('users-body').innerHTML = filtered.length ? `
+        <table>
+          <thead><tr><th>User</th><th>Phone</th><th>Role</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${filtered.map(u => `<tr>
+              <td><div class="applicant-info"><div class="applicant-avatar">${u.fullName[0]}</div><div><div class="applicant-name">${u.fullName}</div><div class="applicant-email">${u.email}</div></div></div></td>
+              <td>${u.phone || '—'}</td>
+              <td><span class="badge active">${u.role}</span></td>
+              <td>${new Date(u.createdAt).toLocaleDateString('en-IN')}</td>
+              <td><span class="badge ${u.isActive ? 'active' : 'inactive'}">● ${u.isActive ? 'Active' : 'Inactive'}</span></td>
+              <td><div class="action-btns">
+                ${u.isActive
+                  ? `<div class="icon-btn danger" title="Deactivate" onclick="deactivateUser(${u.userId})">🚫</div>`
+                  : `<div class="icon-btn" title="Activate" onclick="activateUser(${u.userId})">✅</div>`}
+              </div></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>` : '<div class="empty-state"><div class="icon">👥</div><p>No users found.</p></div>';
+    }
+
+    async function saveUser() {
+      const body = { fullName: document.getElementById('u-name').value, email: document.getElementById('u-email').value, password: document.getElementById('u-password').value, phone: document.getElementById('u-phone').value, role: document.getElementById('u-role').value };
+      try { await api.post('/api/admin/users', body); closeModal('user-modal'); loadUsers(); }
+      catch(err) { alert('Error: ' + err.message); }
+    }
+
+    async function deactivateUser(id) {
+      await api.put(`/api/admin/users/${id}/deactivate`);
+      loadUsers();
+    }
+
+    async function activateUser(id) {
+      await api.put(`/api/admin/users/${id}/activate`);
+      loadUsers();
+    }
+
+    // ── Assign Officers ───────────────────────────────────────────────────────
+    async function loadAssign() {
+      try {
+        const [unassigned, officers] = await Promise.all([
+          api.get('/api/admin/applications/unassigned'),
+          api.get('/api/admin/officers'),
+        ]);
+        allOfficers = officers;
+        document.getElementById('unassigned-count').textContent = `${unassigned.length} application${unassigned.length !== 1 ? 's' : ''} awaiting assignment`;
+        document.getElementById('unassigned-badge').textContent = unassigned.length;
+
+        if (!unassigned.length) {
+          document.getElementById('assign-grid').innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>All applications have been assigned!</p></div>';
+          return;
+        }
+        document.getElementById('assign-grid').innerHTML = unassigned.map(a => `
+          <div class="assign-row">
+            <div class="applicant-avatar" style="width:40px;height:40px;font-size:16px">${a.applicantName[0]}</div>
+            <div class="assign-info">
+              <div class="assign-name">${a.applicantName} — #${a.applicationId}</div>
+              <div class="assign-scheme">📋 ${a.schemeName} • Applied ${new Date(a.appliedAt).toLocaleDateString('en-IN')}</div>
+            </div>
+            <select class="assign-select" id="officer-select-${a.applicationId}">
+              <option value="">Select Officer</option>
+              ${officers.map(o => `<option value="${o.userId}">${o.fullName}</option>`).join('')}
+            </select>
+            <button class="assign-btn" onclick="assignOfficer(${a.applicationId}, this)">Assign</button>
+          </div>`).join('');
+      } catch(err) { console.error(err); }
+    }
+
+    async function assignOfficer(appId, btn) {
+      const select = document.getElementById(`officer-select-${appId}`);
+      if (!select.value) { select.style.borderColor = '#f04444'; return; }
+      btn.textContent = 'Assigning...';
+      btn.disabled = true;
+      try {
+        await api.put(`/api/admin/applications/${appId}/assign`, { officerId: parseInt(select.value) });
+        btn.textContent = '✓ Assigned';
+        btn.classList.add('assigned');
+        select.disabled = true;
+        // Update badge
+        const remaining = document.querySelectorAll('.assign-btn:not(.assigned)').length;
+        document.getElementById('unassigned-badge').textContent = remaining;
+      } catch(err) {
+        alert('Error: ' + err.message);
+        btn.textContent = 'Assign';
+        btn.disabled = false;
+      }
+    }
+
+    // ── Charts ────────────────────────────────────────────────────────────────
+    function initCharts(stats) {
+      new Chart(document.getElementById('doughnutChart'), {
+        type: 'doughnut',
+        data: { labels:['Approved','Pending','Rejected'], datasets:[{ data:[stats.approvedApplications||1, stats.pendingApplications||1, stats.rejectedApplications||1], backgroundColor:['#00c97a','#f59e0b','#f04444'], borderWidth:0, hoverOffset:6 }] },
+        options: { responsive:true, cutout:'72%', plugins:{ legend:{ position:'bottom', labels:{ font:{size:12}, padding:16, usePointStyle:true } } } }
+      });
+      new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: { labels:['Approved','Pending','Rejected'], datasets:[{ data:[stats.approvedApplications, stats.pendingApplications, stats.rejectedApplications], backgroundColor:['rgba(0,201,122,0.2)','rgba(245,158,11,0.2)','rgba(240,68,68,0.2)'], borderColor:['#00c97a','#f59e0b','#f04444'], borderWidth:2, borderRadius:8 }] },
+        options: { responsive:true, plugins:{ legend:{display:false} }, scales:{ x:{grid:{display:false}}, y:{grid:{color:'rgba(0,0,0,0.04)'}} } }
+      });
+    }
+
+    // ── Modals ────────────────────────────────────────────────────────────────
+    function openModal(id)  { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function closeModalOutside(e, id) { if (e.target.id === id) closeModal(id); }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

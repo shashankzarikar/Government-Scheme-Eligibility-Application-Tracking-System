@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — GovScheme Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1a6cf6; --primary-dark: #1251c4; --accent: #00d4aa;
+      --bg: #f0f4ff; --card: #ffffff; --text: #0f1b2d;
+      --muted: #6b7a99; --border: #e2e8f8; --error: #f04444; --success: #00c97a;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+    .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.18; animation: float 8s ease-in-out infinite; pointer-events: none; }
+    .blob-1 { width: 500px; height: 500px; background: #1a6cf6; top: -100px; left: -100px; }
+    .blob-2 { width: 400px; height: 400px; background: #00d4aa; bottom: -80px; right: -80px; animation-delay: 3s; }
+    .blob-3 { width: 300px; height: 300px; background: #7c3aed; top: 50%; left: 50%; animation-delay: 1.5s; }
+    @keyframes float { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20px,-20px) scale(1.05); } }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(26,108,246,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(26,108,246,0.04) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
+    .page-wrapper { display: flex; width: 100%; min-height: 100vh; position: relative; z-index: 1; }
+    .left-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 60px; animation: slideInLeft 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
+    .gov-badge { display: inline-flex; align-items: center; gap: 8px; background: white; border: 1px solid var(--border); border-radius: 100px; padding: 6px 16px; font-size: 12px; font-weight: 500; color: var(--primary); letter-spacing: 0.5px; margin-bottom: 40px; box-shadow: 0 2px 12px rgba(26,108,246,0.1); }
+    .gov-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.3); } }
+    .left-panel h1 { font-family: 'Sora', sans-serif; font-size: clamp(36px,4vw,56px); font-weight: 700; color: var(--text); line-height: 1.15; margin-bottom: 20px; }
+    .left-panel h1 span { background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .left-panel p { font-size: 17px; color: var(--muted); line-height: 1.7; max-width: 420px; margin-bottom: 48px; }
+    .features { display: flex; flex-direction: column; gap: 16px; }
+    .feature-item { display: flex; align-items: center; gap: 14px; animation: fadeInUp 0.6s ease forwards; opacity: 0; }
+    .feature-item:nth-child(1) { animation-delay: 0.3s; } .feature-item:nth-child(2) { animation-delay: 0.45s; } .feature-item:nth-child(3) { animation-delay: 0.6s; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .feature-icon { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), #4a90f7); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(26,108,246,0.25); }
+    .feature-text strong { display: block; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .feature-text span { font-size: 13px; color: var(--muted); }
+    .right-panel { display: flex; align-items: center; justify-content: center; padding: 40px; flex: 0 0 480px; animation: slideInRight 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+    .card { background: var(--card); border-radius: 24px; padding: 48px 44px; width: 100%; max-width: 420px; box-shadow: 0 0 0 1px rgba(26,108,246,0.08), 0 20px 60px rgba(15,27,45,0.1); position: relative; overflow: hidden; }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--primary), var(--accent)); }
+    .card-logo { width: 52px; height: 52px; background: linear-gradient(135deg, var(--primary), #4a90f7); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(26,108,246,0.3); }
+    .card-header { margin-bottom: 36px; }
+    .card-header h2 { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .card-header p { font-size: 14px; color: var(--muted); }
+    .form-group { margin-bottom: 20px; position: relative; }
+    label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
+    .input-wrapper { position: relative; }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--muted); pointer-events: none; }
+    input[type="email"], input[type="password"] { width: 100%; padding: 13px 14px 13px 42px; border: 1.5px solid var(--border); border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: #f8faff; outline: none; transition: all 0.2s; }
+    input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(26,108,246,0.1); }
+    .password-toggle { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; color: var(--muted); }
+    .form-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .remember-me { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .remember-me input[type="checkbox"] { width: 16px; height: 16px; padding: 0; accent-color: var(--primary); }
+    .remember-me span { font-size: 13px; color: var(--muted); }
+    .forgot-link { font-size: 13px; color: var(--primary); text-decoration: none; font-weight: 500; }
+    .role-selector { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 24px; }
+    .role-btn { padding: 10px 8px; border: 1.5px solid var(--border); border-radius: 10px; background: #f8faff; cursor: pointer; text-align: center; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .role-btn .role-emoji { font-size: 20px; display: block; margin-bottom: 4px; }
+    .role-btn .role-label { font-size: 11px; font-weight: 500; color: var(--muted); }
+    .role-btn.active { border-color: var(--primary); background: linear-gradient(135deg,#eef4ff,#f0f9ff); box-shadow: 0 0 0 3px rgba(26,108,246,0.12); }
+    .role-btn.active .role-label { color: var(--primary); }
+    .role-label-text { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
+    .btn-primary { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 12px; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.25s; box-shadow: 0 4px 16px rgba(26,108,246,0.35); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,108,246,0.4); }
+    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .error-msg { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none; }
+    .error-msg.show { display: block; }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .divider span { font-size: 12px; color: var(--muted); }
+    .register-link { text-align: center; font-size: 14px; color: var(--muted); }
+    .register-link a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    @media (max-width: 900px) { .left-panel { display: none; } .right-panel { flex: 1; } }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="page-wrapper">
+    <div class="left-panel">
+      <div class="gov-badge">🇮🇳 Government of India — Digital Portal</div>
+      <h1>Access <span>Government<br/>Schemes</span> with Ease</h1>
+      <p>A unified platform for applying, tracking, and managing government welfare schemes — transparent, fast, and paperless.</p>
+      <div class="features">
+        <div class="feature-item"><div class="feature-icon">📋</div><div class="feature-text"><strong>Apply Online</strong><span>Submit applications for any scheme digitally</span></div></div>
+        <div class="feature-item"><div class="feature-icon">🔍</div><div class="feature-text"><strong>Track in Real Time</strong><span>Know your application status at every stage</span></div></div>
+        <div class="feature-item"><div class="feature-icon">🛡️</div><div class="feature-text"><strong>Secure & Verified</strong><span>Role-based access with full document security</span></div></div>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-logo">🏛️</div>
+          <h2>Welcome Back</h2>
+          <p>Sign in to your GovScheme account</p>
+        </div>
+
+        <!-- Error message box -->
+        <div class="error-msg" id="error-msg">⚠️ <span id="error-text"></span></div>
+
+        <p class="role-label-text">Login as:</p>
+        <div class="role-selector">
+          <div class="role-btn active" data-role="APPLICANT" onclick="selectRole(this)"><span class="role-emoji">👤</span><span class="role-label">Applicant</span></div>
+          <div class="role-btn" data-role="OFFICER" onclick="selectRole(this)"><span class="role-emoji">👮</span><span class="role-label">Officer</span></div>
+          <div class="role-btn" data-role="ADMIN" onclick="selectRole(this)"><span class="role-emoji">⚙️</span><span class="role-label">Admin</span></div>
+        </div>
+
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label>Email Address</label>
+            <div class="input-wrapper">
+              <span class="input-icon">✉️</span>
+              <input type="email" id="email" placeholder="you@example.com" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="password" placeholder="Enter your password" required />
+              <span class="password-toggle" onclick="togglePassword()">👁️</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="remember-me"><input type="checkbox"/><span>Remember me</span></label>
+            <a href="#" class="forgot-link">Forgot password?</a>
+          </div>
+          <button type="submit" class="btn-primary" id="login-btn">Sign In →</button>
+        </form>
+
+        <div class="divider"><span>New to GovScheme?</span></div>
+        <p class="register-link">Don't have an account? <a href="register.html">Create one now</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script>
+    // If already logged in, redirect to appropriate dashboard
+    if (getToken()) {
+      redirectToDashboard(getRole());
+    }
+
+    function redirectToDashboard(role) {
+      if (role === 'ADMIN')     window.location.href = 'admin_dashboard.html';
+      else if (role === 'OFFICER') window.location.href = 'officer_dashboard.html';
+      else                      window.location.href = 'applicant_dashboard.html';
+    }
+
+    function selectRole(el) {
+      document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function togglePassword() {
+      const input = document.getElementById('password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function showError(msg) {
+      document.getElementById('error-text').textContent = msg;
+      document.getElementById('error-msg').classList.add('show');
+    }
+
+    function hideError() {
+      document.getElementById('error-msg').classList.remove('show');
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      hideError();
+
+      const btn   = document.getElementById('login-btn');
+      const email = document.getElementById('email').value.trim();
+      const pass  = document.getElementById('password').value;
+
+      btn.textContent = 'Signing in...';
+      btn.disabled = true;
+
+      try {
+        // POST /api/auth/login
+        const data = await api.post('/api/auth/login', { email, password: pass });
+
+        // Save token, role, name, userId to localStorage
+        saveAuth(data.token, data.role, data.fullName, data.userId);
+
+        btn.textContent = '✓ Success!';
+        btn.style.background = 'linear-gradient(135deg, #00c97a, #00a862)';
+
+        // Redirect based on role
+        setTimeout(() => redirectToDashboard(data.role), 800);
+
+      } catch (err) {
+        showError(err.message || 'Invalid email or password');
+        btn.textContent = 'Sign In →';
+        btn.disabled = false;
+        btn.style.background = '';
+      }
+    }
+  </script>
+</body>
+</html>

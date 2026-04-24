@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register — GovScheme Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --primary: #1a6cf6; --primary-dark: #1251c4; --accent: #00d4aa; --bg: #f0f4ff; --card: #ffffff; --text: #0f1b2d; --muted: #6b7a99; --border: #e2e8f8; --error: #f04444; --success: #00c97a; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; position: relative; overflow-x: hidden; }
+    .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.15; animation: float 8s ease-in-out infinite; pointer-events: none; }
+    .blob-1 { width: 500px; height: 500px; background: #1a6cf6; top: -150px; right: -100px; }
+    .blob-2 { width: 350px; height: 350px; background: #00d4aa; bottom: -80px; left: -80px; animation-delay: 3s; }
+    @keyframes float { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(15px,-15px); } }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(26,108,246,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(26,108,246,0.04) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
+    .container { width: 100%; max-width: 680px; position: relative; z-index: 1; animation: slideUp 0.7s cubic-bezier(0.16,1,0.3,1) forwards; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .top-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), #4a90f7); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .logo-text { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
+    .login-link { font-size: 14px; color: var(--muted); }
+    .login-link a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    .steps { display: flex; align-items: center; margin-bottom: 32px; }
+    .step { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .step-circle { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); background: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--muted); transition: all 0.3s; flex-shrink: 0; }
+    .step.active .step-circle { border-color: var(--primary); background: var(--primary); color: white; box-shadow: 0 0 0 4px rgba(26,108,246,0.15); }
+    .step.done .step-circle { border-color: var(--success); background: var(--success); color: white; }
+    .step-label { font-size: 12px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+    .step.active .step-label { color: var(--primary); } .step.done .step-label { color: var(--success); }
+    .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 8px; transition: background 0.3s; }
+    .step-line.done { background: var(--success); }
+    .card { background: var(--card); border-radius: 24px; padding: 44px; box-shadow: 0 0 0 1px rgba(26,108,246,0.08), 0 20px 60px rgba(15,27,45,0.1); position: relative; overflow: hidden; }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--primary), var(--accent)); }
+    .card-header { margin-bottom: 32px; }
+    .card-header h2 { font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .card-header p { font-size: 14px; color: var(--muted); }
+    .form-section { display: none; }
+    .form-section.active { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-grid .full-width { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 13px; font-weight: 500; color: var(--text); }
+    .required { color: var(--error); }
+    .input-wrapper { position: relative; }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--muted); pointer-events: none; }
+    input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="date"], select, textarea { width: 100%; padding: 13px 14px 13px 42px; border: 1.5px solid var(--border); border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: #f8faff; outline: none; transition: all 0.2s; appearance: none; }
+    textarea { resize: vertical; min-height: 90px; padding-top: 12px; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(26,108,246,0.1); }
+    .gender-options { display: flex; gap: 10px; }
+    .gender-btn { flex: 1; padding: 11px; border: 1.5px solid var(--border); border-radius: 10px; background: #f8faff; cursor: pointer; text-align: center; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); font-weight: 500; transition: all 0.2s; }
+    .gender-btn.active { border-color: var(--primary); background: #eef4ff; color: var(--primary); }
+    .password-strength { margin-top: 6px; }
+    .strength-bar { height: 4px; border-radius: 4px; background: var(--border); overflow: hidden; margin-bottom: 4px; }
+    .strength-fill { height: 100%; border-radius: 4px; width: 0%; transition: all 0.3s; }
+    .strength-text { font-size: 11px; color: var(--muted); }
+    .terms-check { display: flex; align-items: flex-start; gap: 10px; margin-top: 8px; }
+    .terms-check input { width: 16px; height: 16px; padding: 0; flex-shrink: 0; margin-top: 2px; accent-color: var(--primary); }
+    .terms-check span { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .terms-check a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .btn-row { display: flex; gap: 12px; margin-top: 32px; }
+    .btn-secondary { flex: 1; padding: 14px; border: 1.5px solid var(--border); border-radius: 12px; background: white; color: var(--text); font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-primary { flex: 2; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 12px; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.25s; box-shadow: 0 4px 16px rgba(26,108,246,0.35); }
+    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .btn-primary:only-child { flex: 1; }
+    .error-msg { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none; }
+    .error-msg.show { display: block; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .card { padding: 28px 24px; } }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="container">
+    <div class="top-nav">
+      <a href="login.html" class="logo"><div class="logo-icon">🏛️</div><span class="logo-text">GovScheme</span></a>
+      <span class="login-link">Already registered? <a href="login.html">Sign in</a></span>
+    </div>
+
+    <div class="steps">
+      <div class="step active" id="step-1"><div class="step-circle">1</div><span class="step-label">Personal Info</span></div>
+      <div class="step-line" id="line-1"></div>
+      <div class="step" id="step-2"><div class="step-circle">2</div><span class="step-label">Account Setup</span></div>
+      <div class="step-line" id="line-2"></div>
+      <div class="step" id="step-3"><div class="step-circle">3</div><span class="step-label">Confirm</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 id="section-title">Personal Information</h2>
+        <p id="section-desc">Tell us a bit about yourself to get started</p>
+      </div>
+
+      <div class="error-msg" id="error-msg">⚠️ <span id="error-text"></span></div>
+
+      <form onsubmit="return false;">
+
+        <!-- Step 1 -->
+        <div class="form-section active" id="section-1">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>First Name <span class="required">*</span></label>
+              <div class="input-wrapper"><span class="input-icon">👤</span><input type="text" id="firstName" placeholder="Priya" required /></div>
+            </div>
+            <div class="form-group">
+              <label>Last Name <span class="required">*</span></label>
+              <div class="input-wrapper"><span class="input-icon">👤</span><input type="text" id="lastName" placeholder="Sharma" required /></div>
+            </div>
+            <div class="form-group">
+              <label>Date of Birth <span class="required">*</span></label>
+              <div class="input-wrapper"><span class="input-icon">📅</span><input type="date" id="dob" required /></div>
+            </div>
+            <div class="form-group">
+              <label>Phone Number <span class="required">*</span></label>
+              <div class="input-wrapper"><span class="input-icon">📞</span><input type="tel" id="phone" placeholder="+91 98765 43210" required /></div>
+            </div>
+            <div class="form-group full-width">
+              <label>Gender <span class="required">*</span></label>
+              <div class="gender-options">
+                <button type="button" class="gender-btn" data-gender="MALE"   onclick="selectGender(this)">♂ Male</button>
+                <button type="button" class="gender-btn active" data-gender="FEMALE" onclick="selectGender(this)">♀ Female</button>
+                <button type="button" class="gender-btn" data-gender="OTHER" onclick="selectGender(this)">⚧ Other</button>
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label>Residential Address</label>
+              <div class="input-wrapper"><span class="input-icon">📍</span><textarea id="address" placeholder="House no., Street, City, State, PIN code"></textarea></div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn-primary" onclick="nextStep(2)">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="form-section" id="section-2">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label>Email Address <span class="required">*</span></label>
+              <div class="input-wrapper"><span class="input-icon">✉️</span><input type="email" id="email" placeholder="priya@example.com" required /></div>
+            </div>
+            <div class="form-group full-width">
+              <label>Create Password <span class="required">*</span></label>
+              <div class="input-wrapper"><span class="input-icon">🔒</span><input type="password" id="password" placeholder="Min. 8 characters" oninput="checkStrength(this.value)" required /></div>
+              <div class="password-strength">
+                <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+                <span class="strength-text" id="strength-text">Enter a password</span>
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label>Confirm Password <span class="required">*</span></label>
+              <div class="input-wrapper"><span class="input-icon">🔒</span><input type="password" id="confirmPassword" placeholder="Re-enter your password" required /></div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn-secondary" onclick="goToStep(1)">← Back</button>
+            <button type="button" class="btn-primary" onclick="nextStep(3)">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="form-section" id="section-3">
+          <div class="form-grid">
+            <div class="form-group full-width" style="background:#f8faff;border-radius:14px;padding:20px;border:1px solid var(--border);">
+              <p style="font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Review Your Details</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="review-box"></div>
+            </div>
+            <div class="form-group full-width">
+              <label class="terms-check"><input type="checkbox" id="terms" required /><span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span></label>
+            </div>
+            <div class="form-group full-width">
+              <label class="terms-check"><input type="checkbox" /><span>I confirm all provided information is accurate</span></label>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn-secondary" onclick="goToStep(2)">← Back</button>
+            <button type="button" class="btn-primary" id="register-btn" onclick="handleRegister()">Create Account ✓</button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script>
+    const titles = {
+      1: ['Personal Information',  'Tell us a bit about yourself to get started'],
+      2: ['Account Setup',         'Create your secure login credentials'],
+      3: ['Review & Confirm',      'Almost there! Review your details and confirm']
+    };
+
+    let selectedGender = 'FEMALE';
+
+    function selectGender(el) {
+      document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      selectedGender = el.dataset.gender;
+    }
+
+    function showError(msg) {
+      document.getElementById('error-text').textContent = msg;
+      document.getElementById('error-msg').classList.add('show');
+    }
+
+    function hideError() { document.getElementById('error-msg').classList.remove('show'); }
+
+    function nextStep(n) {
+      hideError();
+      // Validate step 1
+      if (n === 2) {
+        if (!document.getElementById('firstName').value.trim() ||
+            !document.getElementById('lastName').value.trim()  ||
+            !document.getElementById('phone').value.trim()     ||
+            !document.getElementById('dob').value) {
+          showError('Please fill in all required fields.'); return;
+        }
+      }
+      // Validate step 2
+      if (n === 3) {
+        const pass    = document.getElementById('password').value;
+        const confirm = document.getElementById('confirmPassword').value;
+        if (!document.getElementById('email').value.trim()) { showError('Email is required.'); return; }
+        if (pass.length < 8) { showError('Password must be at least 8 characters.'); return; }
+        if (pass !== confirm) { showError('Passwords do not match.'); return; }
+        // Populate review box
+        const fn = document.getElementById('firstName').value;
+        const ln = document.getElementById('lastName').value;
+        document.getElementById('review-box').innerHTML = `
+          <div><span style="font-size:12px;color:var(--muted)">Name</span><p style="font-size:14px;font-weight:500">${fn} ${ln}</p></div>
+          <div><span style="font-size:12px;color:var(--muted)">Phone</span><p style="font-size:14px;font-weight:500">${document.getElementById('phone').value}</p></div>
+          <div><span style="font-size:12px;color:var(--muted)">Email</span><p style="font-size:14px;font-weight:500">${document.getElementById('email').value}</p></div>
+          <div><span style="font-size:12px;color:var(--muted)">Gender</span><p style="font-size:14px;font-weight:500">${selectedGender}</p></div>`;
+      }
+      goToStep(n);
+    }
+
+    function goToStep(n) {
+      document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('section-' + n).classList.add('active');
+      for (let i = 1; i <= 3; i++) {
+        const el = document.getElementById('step-' + i);
+        el.classList.remove('active', 'done');
+        if (i < n) el.classList.add('done');
+        else if (i === n) el.classList.add('active');
+        document.querySelector('#step-' + i + ' .step-circle').textContent = i < n ? '✓' : i;
+      }
+      for (let i = 1; i <= 2; i++)
+        document.getElementById('line-' + i).classList.toggle('done', i < n);
+      document.getElementById('section-title').textContent = titles[n][0];
+      document.getElementById('section-desc').textContent  = titles[n][1];
+    }
+
+    function checkStrength(val) {
+      const fill = document.getElementById('strength-fill');
+      const text = document.getElementById('strength-text');
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      const levels = [
+        { w:'0%',   color:'#e2e8f8', label:'Enter a password' },
+        { w:'25%',  color:'#f04444', label:'Weak' },
+        { w:'50%',  color:'#f97316', label:'Fair' },
+        { w:'75%',  color:'#eab308', label:'Good' },
+        { w:'100%', color:'#00c97a', label:'Strong ✓' },
+      ];
+      const level = val.length === 0 ? levels[0] : levels[score];
+      fill.style.width = level.w; fill.style.background = level.color;
+      text.textContent = level.label; text.style.color = level.color;
+    }
+
+    async function handleRegister() {
+      hideError();
+      if (!document.getElementById('terms').checked) {
+        showError('Please accept the Terms of Service.'); return;
+      }
+      const btn = document.getElementById('register-btn');
+      btn.textContent = 'Creating account...';
+      btn.disabled = true;
+
+      const body = {
+        fullName:    document.getElementById('firstName').value.trim() + ' ' + document.getElementById('lastName').value.trim(),
+        email:       document.getElementById('email').value.trim(),
+        password:    document.getElementById('password').value,
+        phone:       document.getElementById('phone').value.trim(),
+        address:     document.getElementById('address').value.trim(),
+        dateOfBirth: document.getElementById('dob').value,
+        gender:      selectedGender
+      };
+
+      try {
+        // POST /api/auth/register
+        await api.post('/api/auth/register', body);
+        btn.textContent = '✓ Account Created!';
+        btn.style.background = 'linear-gradient(135deg, #00c97a, #00a862)';
+        setTimeout(() => window.location.href = 'login.html', 1500);
+      } catch (err) {
+        showError(err.message || 'Registration failed. Please try again.');
+        btn.textContent = 'Create Account ✓';
+        btn.disabled = false;
+        btn.style.background = '';
+      }
+    }
+  </script>
+</body>
+</html>
